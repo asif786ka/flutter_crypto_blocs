@@ -10,7 +10,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Top Coins'),
+        title: const Center(child: Text('Top Coins')),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -22,6 +22,40 @@ class _HomeScreenState extends State<HomeScreen> {
               Colors.grey[900]!,
             ],
           ),
+        ),
+        child: ListView.builder(
+          itemCount: 20,
+          itemBuilder: (BuildContext context, int index) {
+            return ListTile(
+              leading: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    '${++index}',
+                    style: TextStyle(
+                      color: Theme.of(context).accentColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              title: Text(
+                'Bitcoin',
+                style: const TextStyle(color: Colors.white),
+              ),
+              subtitle: Text(
+                'BTC',
+                style: const TextStyle(color: Colors.white70),
+              ),
+              trailing: Text(
+                '\$50000.0000',
+                style: TextStyle(
+                  color: Theme.of(context).accentColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
