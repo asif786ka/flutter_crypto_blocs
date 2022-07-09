@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/crypto/crypto_bloc.dart';
-import '../models/coin_model.dart';
-import '../repositories/crypto_repository.dart';
-
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -12,11 +9,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  ScrollController? _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Center(child: Text('Top Coins')),
+        title: const Text('Top Coins'),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -38,40 +49,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   onRefresh: () async {
                     context.read<CryptoBloc>().add(RefreshCoins());
                   },
-                  child: ListView.builder(
-                    itemCount: state.coins.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final coin = state.coins[index];
-                      return ListTile(
-                        leading: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${++index}',
-                              style: TextStyle(
-                                color: Theme.of(context).accentColor,
-                                fontWeight: FontWeight.w600,
+                  child: NotificationListener<ScrollNotification>(
+                    onNotification: (notification) =>
+                        _onScrollNotification(notification),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: state.coins.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final coin = state.coins[index];
+                        return ListTile(
+                          leading: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                '${++index}',
+                                style: TextStyle(
+                                  color: Theme.of(context).accentColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        title: Text(
-                          coin.fullName,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        subtitle: Text(
-                          coin.name,
-                          style: const TextStyle(color: Colors.white70),
-                        ),
-                        trailing: Text(
-                          '\$${coin.price.toStringAsFixed(4)}',
-                          style: TextStyle(
-                            color: Theme.of(context).accentColor,
-                            fontWeight: FontWeight.w600,
+                            ],
                           ),
-                        ),
-                      );
-                    },
+                          title: Text(
+                            coin.fullName,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          subtitle: Text(
+                            coin.name,
+                            style: const TextStyle(color: Colors.white70),
+                          ),
+                          trailing: Text(
+                            '\$${coin.price.toStringAsFixed(4)}',
+                            style: TextStyle(
+                              color: Theme.of(context).accentColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 );
               case CryptoStatus.error:
@@ -97,5 +113,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  bool _onScrollNotification(ScrollNotification notif) {
+    if (notif is ScrollEndNotification &&
+        _scrollController!.position.extentAfter == 0) {
+      context.read<CryptoBloc>().add(LoadMoreCoins());
+    }
+    return false;
   }
 }

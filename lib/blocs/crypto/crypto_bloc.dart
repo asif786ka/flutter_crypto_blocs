@@ -25,12 +25,17 @@ class CryptoBloc extends Bloc<CryptoEvent, CryptoState> {
       yield* _mapAppStartedToState();
     } else if (event is RefreshCoins) {
       yield* _getCoins();
-    } else if (event is LoadMoreCoins) {}
+    } else if (event is LoadMoreCoins) {
+      yield* _mapLoadMoreCoinsToState();
+    }
   }
 
-  Stream<CryptoState> _getCoins() async* {
+  Stream<CryptoState> _getCoins({int page = 0}) async* {
     try {
-      final coins = await _cryptoRepository.getTopCoins();
+      final coins = [
+        if (page != 0) ...state.coins,
+        ...await _cryptoRepository.getTopCoins(page: page),
+      ];
       yield state.copyWith(coins: coins, status: CryptoStatus.loaded);
     } on Failure catch (err) {
       yield state.copyWith(
@@ -43,5 +48,10 @@ class CryptoBloc extends Bloc<CryptoEvent, CryptoState> {
   Stream<CryptoState> _mapAppStartedToState() async* {
     yield state.copyWith(status: CryptoStatus.loading);
     yield* _getCoins();
+  }
+
+  Stream<CryptoState> _mapLoadMoreCoinsToState() async* {
+    final nextPage = state.coins.length ~/ CryptoRepository.perPage;
+    yield* _getCoins(page: nextPage);
   }
 }

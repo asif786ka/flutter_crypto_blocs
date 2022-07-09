@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/coin_model.dart';
@@ -15,9 +14,9 @@ class CryptoRepository {
   CryptoRepository({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client();
 
-  Future<List<Coin>> getTopCoins() async {
-    const requestUrl =
-        '${_baseUrl}data/top/totalvolfull?limit=$perPage&tsym=USD';
+  Future<List<Coin>> getTopCoins({required int page}) async {
+    final requestUrl =
+        '${_baseUrl}data/top/totalvolfull?limit=$perPage&tsym=USD&page=$page';
     try {
       final response = await _httpClient.get(Uri.parse(requestUrl));
       if (response.statusCode == 200) {
@@ -27,9 +26,7 @@ class CryptoRepository {
       }
       return [];
     } catch (err) {
-      if (kDebugMode) {
-        print(err);
-      }
+      print(err);
       throw Failure(message: err.toString());
     }
   }
