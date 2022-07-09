@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.cryptobloc">
-   <application
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
         android:label="cryptobloc"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
